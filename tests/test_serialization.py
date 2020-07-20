@@ -43,6 +43,21 @@ def save_load_from_filename(
     finally:
         os.unlink(fp.name)
 
+def save_load_from_rel_filename(
+    conf: Any, resolve: bool, expected: Any, file_class: Type[Any]
+) -> None:
+    if expected is None:
+        expected = conf
+    # note that delete=False here is a work around windows incompetence.
+    try:
+        with tempfile.NamedTemporaryFile(delete=False) as path:
+            filepath = file_class(path.name)
+            OmegaConf.save(conf, filepath, resolve=resolve)
+            c2 = OmegaConf.load(filepath)
+            assert c2 == expected
+    finally:
+        os.unlink(path.name)
+
 
 def test_load_from_invalid() -> None:
     with pytest.raises(TypeError):
